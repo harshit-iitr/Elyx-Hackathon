@@ -338,6 +338,18 @@ def extract_events(messages: pd.DataFrame) -> pd.DataFrame:
                     'timestamp': r['timestamp'], 'date': r['date'], 'type': 'Biomarker',
                     'title': 'Sleep Tracking', 'detail': f"Sleep log (normalized): {minutes} min | raw: {txt}", 'sender': sender_name, 'role': norm_role
                 })
+        # HRV detection
+        if "hrv" in low:
+            val = parse_numeric_value(low)
+            if val is not None:
+                if val < 40:
+                    val = 40   # enforce minimum HRV
+                events.append({
+                    'timestamp': r['timestamp'], 'date': r['date'], 'type': 'Biomarker',
+                    'title': 'HRV Tracking',
+                    'detail': f"HRV log (normalized): {val} ms | raw: {txt}",
+                    'sender': sender_name, 'role': norm_role
+                })
 
         if any(k in low for k in EXERCISE_WORDS):
             minutes = None
