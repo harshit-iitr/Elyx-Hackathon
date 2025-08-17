@@ -12,17 +12,7 @@ import os
 from datetime import datetime, date, timedelta, time as dtime
 from io import BytesIO
 
-import requests
 
-# Config — update these for your repo
-GITHUB_USER = "harshit-iitr"
-GITHUB_REPO = "Elyx-Hackathon"
-GITHUB_BRANCH = "main"                 # or the branch where the CSV lives
-CSV_PATH = "Messages Database.csv"  # path in repo
-
-def build_raw_github_url(user: str, repo: str, branch: str, path: str) -> str:
-    # raw.githubusercontent URL pattern
-    return f"https://raw.githubusercontent.com/{user}/{repo}/{branch}/{path}"
 
 @st.cache_data(show_spinner=False)
 def fetch_csv_from_github(raw_url: str, timeout: int = 10) -> pd.DataFrame | None:
@@ -620,39 +610,37 @@ def load_mock_messages() -> pd.DataFrame:
 # Sidebar: require an uploaded file (no mock/local fallback)
 # ----------------
 st.sidebar.title("Elyx – Member Journey")
-st.sidebar.markdown("### Data source (default: GitHub CSV)")
-
-# file uploader (user override)
-uploaded = st.sidebar.file_uploader("Upload chat transcript (.csv)", type=["csv"], help="Upload a CSV to override the default")
+# ----------------
+# Sidebar: require an uploaded file (no mock/local fallback)
+# ----------------
+with st.sidebar.expander("Data source", expanded=True):
+    uploaded = st.file_uploader(
+        "Upload chat transcript (.csv or .docx)",
+        type=["csv", "docx"],
+        help="Upload CSV or .docx transcript (must include timestamp/date and text).",
+        accept_multiple_files=False
+    )
 
 messages_df = None
 
-if uploaded is not None:
-    # Use uploaded file (BytesIO)
+# Require upload — show friendly message and stop if nothing is uploaded.
+if uploaded is None:
+    st.sidebar.info("Upload required — please upload a CSV or DOCX transcript to continue.")
+    st.info("Upload a CSV with columns like timestamp,sender,role,text OR date+time+sender+text. The app will pause until a file is uploaded.")
+    st.stop()
+else:
     try:
-        uploaded_bytes = uploaded.read()
-        messages_df = pd.read_csv(BytesIO(uploaded_bytes), keep_default_na=False)
-        st.sidebar.success(f"Loaded uploaded file: {uploaded.name}")
+        content = uploaded.read()
+        if uploaded.name.lower().endswith('.csv'):
+            messages_df = parse_csv_messages(content)
+        else:
+            messages_df = parse_docx_messages(content)
+        st.sidebar.success(f"Loaded {uploaded.name}")
     except Exception as e:
         st.sidebar.error(f"Could not parse uploaded file: {e}")
-else:
-    # Build raw URL and attempt to fetch
-    raw_url = build_raw_github_url(GITHUB_USER, GITHUB_REPO, GITHUB_BRANCH, CSV_PATH)
-    st.sidebar.write(f"Trying default CSV from GitHub: `{raw_url}`")
-    df_remote = fetch_csv_from_github(raw_url)
-    if df_remote is not None:
-        messages_df = df_remote
-        st.sidebar.success("Loaded CSV from GitHub (default)")
-    else:
-        # fallback to local file (if you keep a local copy on the server)
-        local_path = "/mnt/data/Messages Database.csv"
-        df_local = load_local_csv(local_path)
-        if df_local is not None:
-            messages_df = df_local
-            st.sidebar.info(f"Loaded local CSV at `{local_path}`")
-        else:
-            st.sidebar.warning("No default CSV found on GitHub or local server. Using mock data.")
-            messages_df = load_mock_messages()  # ensure load_mock_messages() exists in your file
+        # stop so the rest of UI doesn't try to run on missing/invalid data
+        st.stop()
+
 messages_df = messages_df.copy()
 if 'timestamp' in messages_df.columns:
     messages_df['timestamp'] = pd.to_datetime(messages_df['timestamp'], errors='coerce')
