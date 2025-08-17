@@ -4,7 +4,7 @@
 
 * **Main Project Link**: Open the Streamlit app directly using the provided link shared in the submission form.
 * **Messages Database**: Please download `Messages Database.csv` and upload it through the app sidebar when prompted.
-* **Flexibility**: This app is flexible and can add any dataset or new user data easily.
+* **Flexibility**: This app is flexible and can add any dataset or new user data easily. For other members or datasets, add any other local CSV file in required format.
 
 ## Repository Structure
 
