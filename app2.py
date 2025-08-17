@@ -655,6 +655,7 @@ nav_options = [   # NEW — appears before Persona
     "Persona",
     "Journey Timeline",
     "Day Snapshot",
+    "Advanced Journey Tracker",
     "Advanced Decisions Explorer",
     "Decisions & Reasons",
     "Biomarkers",
@@ -663,6 +664,15 @@ nav_options = [   # NEW — appears before Persona
 ]
 page = st.sidebar.radio("Go to", nav_options)
 
+if page == 'Advanced Journey Tracker':
+    st.header('Advanced Journey Tracker (external)')
+    st.markdown("Open the external Advanced Journey Tracker in a new tab:")
+    st.markdown(
+        '<a href="https://mk82nj.csb.app/" target="_blank" rel="noopener noreferrer" style="font-size:1.05rem">🔗 Open Advanced Journey Tracker (new tab)</a>',
+        unsafe_allow_html=True
+    )
+    st.info("This opens an external site. Use the app sidebar to return.")
+    st.stop()
 
 # Persona
 if page == 'Persona':
