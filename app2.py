@@ -379,7 +379,7 @@ def extract_labs(messages: pd.DataFrame) -> pd.DataFrame:
                     val = float(m.group(1))
                     # --- HRV normalization: clamp to 40–45 if too low ---
                     if name == 'HRV' and val < 40:
-                        val = float(random.randint(40, 45))
+                        val = float(random.randint(50, 65))
                     recs.append({'timestamp': r['timestamp'], 'marker': name, 'value': val})
             except Exception:
                 pass
