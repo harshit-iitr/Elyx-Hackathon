@@ -310,43 +310,43 @@ Personalised Lifestyle Recommendations: Nutrition, exercise, stress
 management.
 ```
 
-1.
+19.
 
 ```
 okay.. but lets check our story till now , are there any faults?
 ```
 
-2.
+20.
 
 ```
 ohh well, lets finish our job of eigth months then well come back at issues..
 ```
 
-3.
+21.
 
 ```
 hmmm, are all the tests as per guidelines going on in our convo? i didnt notice...
 ```
 
-4.
+22.
 
 ```
 make sure we do some tests in upcoming months regularly, to cover all... thats the main data for database
 ```
 
-5.
+23.
 
 ```
 yeah go on, take week 3 and 4 together!
 ```
 
-6.
+24.
 
 ```
 its getting boring, add some rohan convo questions of curiosity and make more interactive
 ```
 
-7.
+25.
 
 ```
 so wait we have counted four week as one month, but that is not so in every month, soo approx till when should we write to complete 8 months from 15 aug
