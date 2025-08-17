@@ -325,17 +325,20 @@ def extract_events(messages: pd.DataFrame) -> pd.DataFrame:
             events.append({'timestamp': r['timestamp'], 'date': r['date'], 'type': 'Intervention', 'title': 'Plan / Coaching Update', 'detail': txt, 'sender': sender_name, 'role': norm_role})
         if is_summary_text(txt):
             events.append({'timestamp': r['timestamp'], 'date': r['date'], 'type': 'Summary', 'title': 'Weekly Summary', 'detail': txt, 'sender': sender_name, 'role': norm_role})
-        if any(k in low for k in ['sleep','garmin','advik','tst','slept','asleep','bedtime']):
-            smin, emin, dur = parse_time_range_minutes(low)
-            minutes = None
-            if dur:
+        # Sleep detection (Garmin etc.) – only keep duration, skip timing tables (Bed → Awake)
+        if any(k in low for k in ['sleep', 'tst', 'garmin', 'advik']):
+            minutes = parse_duration_minutes(low)
+            if minutes is None:
+                smin, emin, dur = parse_time_range_minutes(low)
                 minutes = dur
-            else:
-                minutes = parse_duration_minutes(low)
             if minutes is not None:
                 if minutes < 180:
                     minutes = 180
-                events.append({'timestamp': r['timestamp'], 'date': r['date'], 'type': 'Biomarker', 'title': 'Sleep Tracking', 'detail': f"Sleep log (normalized): {minutes} min | raw: {txt}", 'sender': sender_name, 'role': norm_role})
+                events.append({
+                    'timestamp': r['timestamp'], 'date': r['date'], 'type': 'Biomarker',
+                    'title': 'Sleep Tracking', 'detail': f"Sleep log (normalized): {minutes} min | raw: {txt}", 'sender': sender_name, 'role': norm_role
+                })
+
         if any(k in low for k in EXERCISE_WORDS):
             minutes = None
             dmin = parse_duration_minutes(low)
