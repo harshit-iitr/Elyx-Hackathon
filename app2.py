@@ -791,7 +791,7 @@ elif page == 'Biomarkers':
 
 # Internal Metrics
 elif page == 'Internal Metrics':
-    st.header('Internal Metrics (heuristic)')
+    st.header('Internal Metrics')
     st.caption('Estimated internal hours spent by role (members and unnamed roles are excluded automatically).')
 
     # Use sensible default per-interaction minutes (no sliders)
@@ -859,4 +859,4 @@ elif page == 'Conversation':
 
 # Footer
 st.markdown('---')
-st.markdown('**Notes:**\n- Upload a CSV with columns like timestamp,sender,role,text OR date+time+sender+text.\n- The app auto-extracts travel/test/intervention events, lab numbers, **sleep timing (Garmin/Advik logs)** and **exercise minutes** using heuristics.')
+st.markdown('**Notes:**\n- Upload a CSV with columns like timestamp,sender,role,text OR date+time+sender+text.\n- The app auto-extracts travel/test/intervention events, lab numbers, **sleep timing** and **exercise minutes**.')
