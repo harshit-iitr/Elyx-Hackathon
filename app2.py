@@ -575,7 +575,7 @@ def load_mock_messages() -> pd.DataFrame:
     return df
 
 # Sidebar & Data Loading
-st.sidebar.title("Elyx – Member Journey")
+
 # ----------------
 # Sidebar: require an uploaded file (no mock/local fallback)
 # ----------------
