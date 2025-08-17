@@ -210,6 +210,15 @@ def parse_csv_messages(file_bytes_or_path) -> pd.DataFrame:
     df = df.sort_values('timestamp', na_position='last').reset_index(drop=True)
     df.drop(columns=['sender_clean','role_from_sender'], inplace=True, errors='ignore')
     return df
+def parse_numeric_value(text: str) -> float | None:
+    """Extract the first reasonable numeric value from text (for HRV etc.)."""
+    nums = re.findall(r"\d+(?:\.\d+)?", text)
+    if not nums:
+        return None
+    try:
+        return float(nums[0])
+    except:
+        return None
 
 # Feature extraction
 @st.cache_data(show_spinner=False)
