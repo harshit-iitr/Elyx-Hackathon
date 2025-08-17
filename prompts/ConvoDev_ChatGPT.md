@@ -1,4 +1,4 @@
-# Additional GPT Conversation Prompts — Elyx Member Journey (reformatted)
+# ChatGPT Conversation Prompts — Elyx Member Journey (reformatted)
 
 *This file contains the real prompts/instructions provided by the project owner. Each numbered item below corresponds to a single prompt. All prompts arent included, it is just a sample.*
 
