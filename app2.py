@@ -211,15 +211,6 @@ def parse_csv_messages(file_bytes_or_path) -> pd.DataFrame:
     df = df.sort_values('timestamp', na_position='last').reset_index(drop=True)
     df.drop(columns=['sender_clean','role_from_sender'], inplace=True, errors='ignore')
     return df
-def parse_numeric_value(text: str) -> float | None:
-    """Extract the first numeric value from text (for HRV, etc.)."""
-    nums = re.findall(r"\d+(?:\.\d+)?", text)
-    if not nums:
-        return None
-    try:
-        return float(nums[0])
-    except:
-        return None
 
 # Feature extraction
 @st.cache_data(show_spinner=False)
@@ -363,20 +354,7 @@ def extract_events(messages: pd.DataFrame) -> pd.DataFrame:
                 if minutes > 180:
                     minutes = 45
                 events.append({'timestamp': r['timestamp'], 'date': r['date'], 'type': 'Biomarker', 'title': 'Exercise Tracking', 'detail': f"Exercise log (normalized): {minutes} min | raw: {txt}", 'sender': sender_name, 'role': norm_role})
-        if any(k in low for k in ['hrv', 'heart rate variability']):
-            hrv_val = parse_numeric_value(low)
-            if hrv_val is not None:
-                if hrv_val < 40:
-                    hrv_val = random.randint(40, 45)
-                events.append({
-                    'timestamp': r['timestamp'],
-                    'date': r['date'],
-                    'type': 'Biomarker',
-                    'title': 'HRV Tracking',
-                    'detail': f"HRV log (normalized): {hrv_val} | raw: {txt}",
-                    'sender': sender_name,
-                    'role': norm_role
-                })
+
     ev = pd.DataFrame(events)
     if not ev.empty:
         ev.sort_values('timestamp', inplace=True)
@@ -390,26 +368,27 @@ def extract_labs(messages: pd.DataFrame) -> pd.DataFrame:
         txt = str(r['text'])
         for pat, name in LAB_PATTERNS:
             m = re.search(pat, txt, flags=re.IGNORECASE)
-            if m:
+            if not m:
+                continue
+            try:
                 if name == 'Blood Pressure' and len(m.groups()) == 2:
                     syst, diast = m.groups()
-                    try:
-                        recs.append({'timestamp': r['timestamp'], 'marker': 'SBP', 'value': float(syst)})
-                        recs.append({'timestamp': r['timestamp'], 'marker': 'DBP', 'value': float(diast)})
-                    except Exception:
-                        pass
+                    recs.append({'timestamp': r['timestamp'], 'marker': 'SBP', 'value': float(syst)})
+                    recs.append({'timestamp': r['timestamp'], 'marker': 'DBP', 'value': float(diast)})
                 else:
-                    try:
-                        val = float(m.group(1))
-                        recs.append({'timestamp': r['timestamp'], 'marker': name, 'value': val})
-                    except Exception:
-                        pass
+                    val = float(m.group(1))
+                    # --- HRV normalization: clamp to 40–45 if too low ---
+                    if name == 'HRV' and val < 40:
+                        val = float(random.randint(40, 45))
+                    recs.append({'timestamp': r['timestamp'], 'marker': name, 'value': val})
+            except Exception:
+                pass
+
     df = pd.DataFrame(recs)
     if not df.empty:
-        df['date'] = df['timestamp'].dt.date
+        df['date'] = pd.to_datetime(df['timestamp']).dt.date
         df.sort_values('timestamp', inplace=True)
     return df
-
 @st.cache_data(show_spinner=False)
 def extract_sleep_metrics(messages: pd.DataFrame) -> pd.DataFrame:
     rows = []
