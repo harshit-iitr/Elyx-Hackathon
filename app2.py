@@ -786,9 +786,8 @@ elif page == 'Biomarkers':
             st.plotly_chart(fig, use_container_width=True)
         st.markdown('#### Raw biomarker table')
         st.dataframe(biomarkers_df.sort_values('timestamp'))
-        '''if not sleep_df.empty:
-            st.markdown('#### Sleep timing (bed → wake)')
-            st.dataframe(sleep_df[['date','bedtime','waketime','sleep_hours']])'''
+        # Removed extra sleep timing table (bed → wake)
+
 
 # Internal Metrics
 elif page == 'Internal Metrics':
