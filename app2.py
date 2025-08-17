@@ -11,12 +11,6 @@ import random
 import os
 from datetime import datetime, date, timedelta, time as dtime
 from io import BytesIO
-from typing import Optional
-GITHUB_USER = "harshit-iitr"
-GITHUB_REPO = "Elyx-Hackathon"
-DEFAULT_BRANCH = "main"
-# If repo is private, set a token in st.secrets or env and pass it below
-GITHUB_TOKEN = st.secrets.get("GITHUB_TOKEN") if "GITHUB_TOKEN" in st.secrets else None
 
 # --- Helpers (cached) ---
 @st.cache_data(show_spinner=False)
@@ -656,60 +650,13 @@ st.sidebar.title("Elyx – Member Journey")
 # ----------------
 # Sidebar: require an uploaded file (no mock/local fallback)
 # ----------------
-with st.sidebar.expander("Browse GitHub repo files", expanded=True):
-    st.markdown("### Browse repo files")
-    owner = st.text_input("Owner", value=GITHUB_USER)
-    repo = st.text_input("Repo", value=GITHUB_REPO)
-    branch = st.text_input("Branch", value=DEFAULT_BRANCH)
-    folder = st.text_input("Path (folder) — leave empty for root", value="")
-    exts = st.multiselect("Filter extensions", options=[".csv", ".md", ".docx", ".py", ".txt"], default=[".csv"])
-
-    if st.button("List files"):
-        entries = list_github_dir(owner, repo, path=folder.strip(), branch=branch, token=GITHUB_TOKEN)
-        if not entries:
-            st.warning("No files/folder found (or repo/path/branch incorrect).")
-        else:
-            # `entries` can be a dict for a single file; normalize to list
-            if isinstance(entries, dict) and entries.get("type") == "file":
-                entries = [entries]
-            file_items = [e for e in entries if e.get("type") == "file"]
-            # Filter by extensions if selected
-            if exts:
-                file_items = [f for f in file_items if any(f["name"].lower().endswith(ext) for ext in exts)]
-            if not file_items:
-                st.info("No files matched the selected extensions.")
-            else:
-                choose = st.selectbox("Select a file to preview/load", options=[f["name"] for f in file_items])
-                selected = next((f for f in file_items if f["name"] == choose), None)
-                if selected:
-                    st.markdown(f"**Path:** `{selected['path']}`")
-                    col1, col2 = st.columns([1,3])
-                    with col1:
-                        if st.button("Load into app (CSV)"):
-                            content = fetch_github_file_raw(owner, repo, selected["path"], branch=branch, token=GITHUB_TOKEN)
-                            if content is None:
-                                st.error("Could not fetch file content.")
-                            else:
-                                # try load as CSV
-                                try:
-                                    df = pd.read_csv(BytesIO(content), keep_default_na=False)
-                                    st.success(f"Loaded CSV: {selected['name']} (rows: {len(df)})")
-                                    st.session_state["messages_df_from_github"] = df
-                                except Exception as e:
-                                    st.error(f"Not a CSV or parsing failed: {e}")
-                    with col2:
-                        if st.button("Preview raw (first 2000 chars)"):
-                            content = fetch_github_file_raw(owner, repo, selected["path"], branch=branch, token=GITHUB_TOKEN)
-                            if content is None:
-                                st.error("Could not fetch file content.")
-                            else:
-                                # try text decode
-                                try:
-                                    txt = content.decode("utf-8", errors="replace")
-                                    st.text_area("Preview", value=txt[:2000], height=300)
-                                    st.download_button("Download file", data=content, file_name=selected["name"])
-                                except Exception:
-                                    st.download_button("Download file", data=content, file_name=selected["name"])
+with st.sidebar.expander("Data source", expanded=True):
+    uploaded = st.file_uploader(
+        "Upload chat transcript (.csv or .docx)",
+        type=["csv", "docx"],
+        help="Upload CSV or .docx transcript (must include timestamp/date and text).",
+        accept_multiple_files=False
+    )
 messages_df = None
 if "messages_df_from_github" in st.session_state:
     messages_df = st.session_state["messages_df_from_github"]
