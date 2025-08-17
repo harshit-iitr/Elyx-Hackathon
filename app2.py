@@ -859,4 +859,4 @@ elif page == 'Conversation':
 
 # Footer
 st.markdown('---')
-st.markdown('**Notes:**\n- Upload a CSV with columns like timestamp,sender,role,text OR date+time+sender+text.\n- The app auto-extracts travel/test/intervention events, lab numbers, **sleep timing (Garmin/Advik logs)** and **exercise minutes** using heuristics.\n- To improve detection, tweak LAB_PATTERNS, EXERCISE_WORDS, and the time/duration regexes in this script.\n')
+st.markdown('**Notes:**\n- Upload a CSV with columns like timestamp,sender,role,text OR date+time+sender+text.\n- The app auto-extracts travel/test/intervention events, lab numbers, **sleep timing (Garmin/Advik logs)** and **exercise minutes** using heuristics.')
